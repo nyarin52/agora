@@ -74,6 +74,10 @@
   .agora-badge-amber {
     @apply agora-badge bg-amber-500/10 text-amber-400 border border-amber-500/20;
   }
+
+  .agora-badge-gray {
+    @apply agora-badge bg-surface-700 text-surface-300 border border-surface-600;
+  }
 }
 
 /* Markdown content styling */

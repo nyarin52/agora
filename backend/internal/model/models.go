@@ -12,6 +12,7 @@ type Project struct {
 	RootPath      string    `json:"root_path"`
 	Status        string    `json:"status"`
 	Tags          string    `json:"tags"`
+	Progress      string    `json:"progress"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }

@@ -102,6 +102,7 @@ func migrate(db *sql.DB) error {
 	// Add root_path column if missing (idempotent)
 	db.Exec(`ALTER TABLE projects ADD COLUMN root_path TEXT DEFAULT ''`)
 	db.Exec(`ALTER TABLE projects ADD COLUMN repository_url TEXT DEFAULT ''`)
+	db.Exec(`ALTER TABLE projects ADD COLUMN progress TEXT DEFAULT ''`)
 
 	return nil
 }

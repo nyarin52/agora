@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { getProject, getReleases, getProjectSkills, getDocuments, getDocumentContent, getRepository } from '../lib/api'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { getProject, getReleases, getProjectSkills, getDocuments, getDocumentContent, getRepository, updateProject } from '../lib/api'
+import { ProgressSection } from '../components/ProgressSection'
 import {
   ArrowLeft,
   Github,
@@ -39,6 +40,7 @@ function SectionHeader({ title, icon: Icon, count }: { title: string; icon: any;
 export function ProjectDetail() {
   const { id } = useParams<{ id: string }>()
   const [viewingDoc, setViewingDoc] = useState<any>(null)
+  const queryClient = useQueryClient()
 
   const { data: project, isLoading: loadingProject } = useQuery({
     queryKey: ['project', id],
@@ -138,7 +140,16 @@ export function ProjectDetail() {
         </div>
       </section>
 
-      {/* ===== 2. Repository ===== */}
+      {/* ===== 2. Progress & TODOs ===== */}
+      <ProgressSection
+        progress={project.progress || ''}
+        onSave={async (text) => {
+          await updateProject(id!, { ...project, progress: text })
+          queryClient.invalidateQueries({ queryKey: ['project', id] })
+        }}
+      />
+
+      {/* ===== 3. Repository ===== */}
       <section>
         <SectionHeader title="Repository" icon={Github} />
         {hasGithub && repoURL ? (
@@ -172,7 +183,7 @@ export function ProjectDetail() {
         )}
       </section>
 
-      {/* ===== 3. Releases ===== */}
+      {/* ===== 4. Releases ===== */}
       <section>
         <SectionHeader title="Releases" icon={Tag} count={releaseList.length} />
         {releaseList.length === 0 ? (
@@ -229,7 +240,7 @@ export function ProjectDetail() {
         )}
       </section>
 
-      {/* ===== 4. Documents ===== */}
+      {/* ===== 5. Documents ===== */}
       <section>
         <SectionHeader title="Documents" icon={FileText} count={documentList.length} />
         {documentList.length === 0 ? (
@@ -284,7 +295,7 @@ export function ProjectDetail() {
         )}
       </section>
 
-      {/* ===== 5. Skills ===== */}
+      {/* ===== 6. Skills ===== */}
       <section>
         <SectionHeader title="Skills" icon={Puzzle} count={skillList.length} />
         {skillList.length === 0 ? (

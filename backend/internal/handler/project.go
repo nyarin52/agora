@@ -16,7 +16,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-const projectColumns = `id, name, description, github_owner, github_repo, repository_url, root_path, status, tags, created_at, updated_at`
+const projectColumns = `id, name, description, github_owner, github_repo, repository_url, root_path, status, tags, progress, created_at, updated_at`
 
 func (h *Handler) ListProjects(w http.ResponseWriter, r *http.Request) {
 	rows, err := h.DB.Query(`SELECT ` + projectColumns + ` FROM projects ORDER BY updated_at DESC`)
@@ -29,7 +29,7 @@ func (h *Handler) ListProjects(w http.ResponseWriter, r *http.Request) {
 	projects := []model.Project{}
 	for rows.Next() {
 		var p model.Project
-		if err := rows.Scan(&p.ID, &p.Name, &p.Description, &p.GitHubOwner, &p.GitHubRepo, &p.RepositoryURL, &p.RootPath, &p.Status, &p.Tags, &p.CreatedAt, &p.UpdatedAt); err != nil {
+		if err := rows.Scan(&p.ID, &p.Name, &p.Description, &p.GitHubOwner, &p.GitHubRepo, &p.RepositoryURL, &p.RootPath, &p.Status, &p.Tags, &p.Progress, &p.CreatedAt, &p.UpdatedAt); err != nil {
 			respondError(w, http.StatusInternalServerError, "internal server error")
 			return
 		}
@@ -42,7 +42,7 @@ func (h *Handler) GetProject(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	var p model.Project
 	err := h.DB.QueryRow(`SELECT `+projectColumns+` FROM projects WHERE id = ?`, id).
-		Scan(&p.ID, &p.Name, &p.Description, &p.GitHubOwner, &p.GitHubRepo, &p.RepositoryURL, &p.RootPath, &p.Status, &p.Tags, &p.CreatedAt, &p.UpdatedAt)
+		Scan(&p.ID, &p.Name, &p.Description, &p.GitHubOwner, &p.GitHubRepo, &p.RepositoryURL, &p.RootPath, &p.Status, &p.Tags, &p.Progress, &p.CreatedAt, &p.UpdatedAt)
 	if err != nil {
 		respondError(w, http.StatusNotFound, "project not found")
 		return
@@ -62,10 +62,11 @@ func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result, err := h.DB.Exec(
-		`INSERT INTO projects (name, description, github_owner, github_repo, status, tags) VALUES (?, ?, ?, ?, ?, ?)`,
+		`INSERT INTO projects (name, description, github_owner, github_repo, status, tags, progress) VALUES (?, ?, ?, ?, ?, ?, ?)`,
 		p.Name, p.Description, p.GitHubOwner, p.GitHubRepo,
 		coalesceStr(p.Status, "active"),
 		coalesceStr(p.Tags, "[]"),
+		coalesceStr(p.Progress, ""),
 	)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "internal server error")
@@ -93,8 +94,8 @@ func (h *Handler) UpdateProject(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err := h.DB.Exec(
-		`UPDATE projects SET name=?, description=?, github_owner=?, github_repo=?, status=?, tags=?, updated_at=CURRENT_TIMESTAMP WHERE id=?`,
-		p.Name, p.Description, p.GitHubOwner, p.GitHubRepo, p.Status, p.Tags, id,
+		`UPDATE projects SET name=?, description=?, github_owner=?, github_repo=?, status=?, tags=?, progress=?, updated_at=CURRENT_TIMESTAMP WHERE id=?`,
+		p.Name, p.Description, p.GitHubOwner, p.GitHubRepo, p.Status, p.Tags, p.Progress, id,
 	)
 	if err != nil {
 			respondError(w, http.StatusInternalServerError, "internal server error")
