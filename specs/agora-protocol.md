@@ -45,7 +45,7 @@ custom:
 ## 最小示例
 
 ```yaml
-name: goodsx
+name: agora
 type: web-app
 dependencies:
   ecosystems: [npm]

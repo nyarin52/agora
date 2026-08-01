@@ -89,7 +89,7 @@ Agora **导入/同步**时解析协议，写入索引，不依赖轮询猜测。
 ### 3.2 目录结构
 
 ```
-Goodsx/                        # Agora 自身仓库
+Agora/                        # Agora 自身仓库
 ├── docs/                        # Agora 项目文档（源码的一部分）
 │   ├── design/                  # 设计决策
 │   ├── dev_note/                # 开发笔记
@@ -369,8 +369,8 @@ MVP 阶段使用轻量 Token 认证，不做用户登录系统。
 Agora 仓库本身就是第一个测试用例：
 
 ```
-Goodsx/
-├── .agora.yaml          # 待创建：声明 docs/ 目录映射
+Agora/
+├── .agora.yaml          # 声明 docs/ 目录映射，配置 repository
 ├── docs/
 │   ├── design/          # 5 篇设计文档（含本文）
 │   └── dev_note/        # 4 篇开发笔记
@@ -379,7 +379,7 @@ Goodsx/
 
 **验证清单**（Tier 0 收尾）：
 
-- [ ] 创建 `Goodsx/.agora.yaml`
+- [x] 创建 `Agora/.agora.yaml`
 - [ ] 实现协议扫描：解析 yaml → 索引 `docs/` 下所有 md
 - [ ] Web 面板：Agora 项目详情页正确展示 9 篇文档
 - [ ] 点击文档可读取并展示内容
