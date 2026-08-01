@@ -1,0 +1,11 @@
+name: Agora
+description: "个人开发中心 — 管理软件项目、文档与技能"
+type: web-app
+
+skills:
+  - review-bugbot
+  - review-security
+
+documents:
+  design: docs/design/
+  dev-notes: docs/dev_note/

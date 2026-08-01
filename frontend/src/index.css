@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-surface-800;
+  }
+
+  body {
+    @apply bg-surface-950 text-surface-100;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-700 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-600;
+  }
+}
+
+@layer components {
+  .agora-card {
+    @apply bg-surface-900 border border-surface-800 rounded-xl p-6
+           hover:border-surface-700 transition-all duration-200;
+  }
+
+  .agora-btn {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
+           transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-agora-500/50
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .agora-btn-primary {
+    @apply agora-btn bg-agora-600 text-white hover:bg-agora-500 active:bg-agora-700;
+  }
+
+  .agora-btn-secondary {
+    @apply agora-btn bg-surface-800 text-surface-200 hover:bg-surface-700
+           border border-surface-700 hover:border-surface-600;
+  }
+
+  .agora-btn-ghost {
+    @apply agora-btn text-surface-400 hover:text-surface-100 hover:bg-surface-800;
+  }
+
+  .agora-input {
+    @apply w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm
+           text-surface-100 placeholder:text-surface-500
+           focus:outline-none focus:ring-2 focus:ring-agora-500/50 focus:border-agora-500
+           transition-all duration-200;
+  }
+
+  .agora-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+  }
+
+  .agora-badge-blue {
+    @apply agora-badge bg-agora-500/10 text-agora-400 border border-agora-500/20;
+  }
+
+  .agora-badge-green {
+    @apply agora-badge bg-emerald-500/10 text-emerald-400 border border-emerald-500/20;
+  }
+
+  .agora-badge-amber {
+    @apply agora-badge bg-amber-500/10 text-amber-400 border border-amber-500/20;
+  }
+}
+
+/* Markdown content styling */
+.prose-custom {
+  @apply text-surface-200 leading-relaxed;
+}
+.prose-custom h1 { @apply text-2xl font-bold text-surface-50 mb-4; }
+.prose-custom h2 { @apply text-xl font-semibold text-surface-100 mb-3 mt-6; }
+.prose-custom h3 { @apply text-lg font-medium text-surface-200 mb-2 mt-4; }
+.prose-custom p { @apply mb-3; }
+.prose-custom ul, .prose-custom ol { @apply mb-3 pl-5; }
+.prose-custom li { @apply mb-1; }
+.prose-custom code { @apply bg-surface-800 px-1.5 py-0.5 rounded text-sm font-mono text-agora-300; }
+.prose-custom pre { @apply bg-surface-800 rounded-lg p-4 mb-4 overflow-x-auto; }
+.prose-custom pre code { @apply bg-transparent p-0 text-surface-200; }
+.prose-custom blockquote { @apply border-l-2 border-agora-500 pl-4 italic text-surface-400 mb-3; }
+.prose-custom a { @apply text-agora-400 hover:text-agora-300 underline; }

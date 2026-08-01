@@ -1,0 +1,75 @@
+package main
+
+import (
+	"database/sql"
+	"fmt"
+	"os"
+	"path/filepath"
+
+	_ "modernc.org/sqlite"
+)
+
+func main() {
+	absPath, _ := filepath.Abs(".")
+	dbPath := filepath.Join(absPath, "agora-data", "agora.db")
+	db, err := sql.Open("sqlite", dbPath)
+	if err != nil {
+		fmt.Println("ERR open:", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	// Show current state
+	rows, _ := db.Query("SELECT id, title FROM documents WHERE project_id=1")
+	fmt.Println("Before:")
+	for rows.Next() {
+		var id int64; var t string
+		rows.Scan(&id, &t)
+		fmt.Printf("  id=%d title=%q\n", id, t)
+	}
+	rows.Close()
+
+	// Delete all existing docs for project 1
+	db.Exec("DELETE FROM documents WHERE project_id=1")
+
+	// Write correct content
+	content := `# 弹窗定位设计决策 — 全屏遮罩 vs Tab 区域居中
+
+## 背景
+
+Dashboard 的 "Add your first project" 按钮点击后跳转到 /projects?create=true，自动弹出 New Project 窗口。窗口使用固定定位 + 全屏遮罩覆盖整个页面。讨论：是否应改为仅在 Tab 内容区域居中。
+
+## 讨论过程
+
+- Q: 放在 Tab 区域中心会不会更好？
+- A: 全屏遮罩更好。
+
+## 决策
+
+保持全屏中心定位。理由：阻塞式操作不应被导航打断；Linear/Vercel/GitHub 等行业标准均如此。
+
+## 延伸规范
+
+- 所有弹窗统一 animate-slide-up + fixed inset-0 遮罩 + 居中内容
+
+## 日期
+
+2026-08-01
+`
+	dir := filepath.Join(absPath, "agora-data", "projects", "1", "dev_note")
+	os.MkdirAll(dir, 0755)
+	filePath := filepath.Join(dir, "弹窗定位-20260801.md")
+	os.WriteFile(filePath, []byte(content), 0644)
+
+	db.Exec("INSERT INTO documents (project_id, type, title, file_path, tags) VALUES (1, 'dev_note', '弹窗定位设计决策', ?, '[\"UI\",\"设计决策\"]')", filePath)
+
+	// Show result
+	rows, _ = db.Query("SELECT id, title FROM documents WHERE project_id=1")
+	fmt.Println("After:")
+	for rows.Next() {
+		var id int64; var t string
+		rows.Scan(&id, &t)
+		fmt.Printf("  id=%d title=%q\n", id, t)
+	}
+	rows.Close()
+}

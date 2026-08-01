@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Build artifacts
+backend/agora-server
+*.exe
+
+# Data
+agora-db/
+*.db
+*.db-journal
+*.db-wal
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

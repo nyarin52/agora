@@ -1,0 +1,48 @@
+---
+description: React 前端编码与 UI 规范
+globs: frontend/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# 前端编码规范
+
+## UI 组件类
+
+- 使用 Tailwind utility classes，禁止裸 hex 颜色
+- 自定义类用 `@layer components` 中的 agora-* 前缀
+- 可用类: `agora-card`, `agora-btn`, `agora-btn-primary`, `agora-btn-secondary`, `agora-btn-ghost`, `agora-input`, `agora-badge`, `agora-badge-blue`, `agora-badge-green`, `agora-badge-amber`
+
+```tsx
+// ✅ GOOD
+<button className="agora-btn-primary">
+  <PlusCircle size={16} />
+  Add Project
+</button>
+
+// ❌ BAD
+<button className="bg-[#4c6ef5] text-white rounded-lg px-4 py-2">
+```
+
+## API 调用
+
+- 所有 API 调用通过 `src/lib/api.ts` 导出的函数
+- 不要直接在组件里写 `fetch('/api/...')`
+- 使用 `@tanstack/react-query` 的 `useQuery` / `useMutation` 管理状态
+
+## 表单验证
+
+- 前端表单提交前必须验证必填字段
+- import 表单的 `owner/repo` 格式需检查是否包含 `/`
+- 显示用户友好的错误提示
+
+## 动画
+
+- 页面入场: `animate-fade-in`
+- Modal 弹窗: `animate-slide-up`
+- 不加额外的自定义动画
+
+## 颜色系统 (Tailwind 扩展)
+
+- 主色调: `agora-*` (Indigo-Blue)
+- 表面色: `surface-*` (Gray scale, dark theme)
+- 强调色: `emerald-*` / `amber-*` / `purple-*`

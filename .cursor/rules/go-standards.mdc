@@ -1,0 +1,46 @@
+---
+description: Go 后端编码规范
+globs: backend/**/*.go
+alwaysApply: false
+---
+
+# Go 编码规范
+
+## Handler 模式
+
+```go
+// ✅ 标准 handler 模式
+func (h *Handler) ListProjects(w http.ResponseWriter, r *http.Request) {
+    rows, err := h.DB.Query(`SELECT ...`)
+    if err != nil {
+        respondError(w, http.StatusInternalServerError, err.Error())
+        return
+    }
+    defer rows.Close()
+    // scan and respond
+    respondJSON(w, http.StatusOK, items)
+}
+```
+
+## 错误处理
+
+- 所有 SQL 查询错误必须返回 500 而非 panic
+- 外部服务调用（GitHub API）错误需 wrap 上下文信息
+- 文件操作失败时考虑回滚数据库写入
+
+## 路由参数
+
+- chi URL 参数名必须与路由定义一致
+- `chi.URLParam(r, "paramName")` 的 paramName 必须匹配路由 pattern
+
+## 数据库
+
+- SQLite 使用 `?` 占位符，不使用 `$1`
+- 所有动态查询参数化，禁止字符串拼接 SQL
+- 迁移用 `CREATE TABLE IF NOT EXISTS`
+
+## 配置
+
+- 所有配置通过环境变量注入，不从文件读取
+- 路径统一用 `filepath.Join`，不用字符串拼接
+- `os.MkdirAll` 在启动时确保目录存在
