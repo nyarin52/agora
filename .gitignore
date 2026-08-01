@@ -24,6 +24,11 @@ agora-db/
 *.swp
 *.swo
 
+# Docker
+docker-compose.override.yml
+.docker/
+*.tar
+
 # OS
 .DS_Store
 Thumbs.db
