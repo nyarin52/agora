@@ -16,6 +16,18 @@ import (
 func (h *Handler) SyncProject(w http.ResponseWriter, r *http.Request) {
 	projectID, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 
+	// Verify project exists before scanning
+	var exists int
+	err := h.DB.QueryRow(`SELECT 1 FROM projects WHERE id = ?`, projectID).Scan(&exists)
+	if err == sql.ErrNoRows {
+		respondError(w, http.StatusNotFound, "project not found")
+		return
+	}
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+
 	var req struct {
 		RootPath string `json:"root_path"`
 	}

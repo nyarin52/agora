@@ -17,6 +17,10 @@ func New(cfg *config.Config) *sql.DB {
 
 	db.SetMaxOpenConns(1) // SQLite single-writer limitation
 
+	if _, err := db.Exec("PRAGMA foreign_keys = ON"); err != nil {
+		log.Fatalf("failed to enable foreign keys: %v", err)
+	}
+
 	if err := db.Ping(); err != nil {
 		log.Fatalf("failed to ping database: %v", err)
 	}

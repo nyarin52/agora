@@ -59,7 +59,7 @@ export function createDocument(projectId: string, data: any) {
   return request<any>(`/projects/${projectId}/documents`, { method: 'POST', body: JSON.stringify(data) })
 }
 export function updateDocument(projectId: string, docId: string, data: any) {
-  return request<any>(`/projects/${projectId}/documents/${docId}/content`, { method: 'PUT', body: JSON.stringify(data) })
+  return request<any>(`/projects/${projectId}/documents/${docId}`, { method: 'PUT', body: JSON.stringify(data) })
 }
 export function deleteDocument(projectId: string, docId: string) {
   return request(`/projects/${projectId}/documents/${docId}`, { method: 'DELETE' })

@@ -148,18 +148,18 @@ export function Documents() {
         </div>
       )}
 
-      {/* Create Document Modal */}
+      {/* Create Document Modal — manual index entry */}
       {showCreate && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setShowCreate(false)}>
-          <div className="bg-surface-900 border border-surface-700 rounded-2xl p-6 w-full max-w-2xl animate-slide-up" onClick={e => e.stopPropagation()}>
-            <h2 className="text-lg font-semibold text-surface-100 mb-4">New {docTypes.find(d => d.value === activeType)?.label} Document</h2>
+          <div className="bg-surface-900 border border-surface-700 rounded-2xl p-6 w-full max-w-lg animate-slide-up" onClick={e => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold text-surface-100 mb-4">Add {docTypes.find(d => d.value === activeType)?.label} Index</h2>
             <form onSubmit={e => {
               e.preventDefault()
               const fd = new FormData(e.currentTarget)
               createMut.mutate({
                 type: activeType,
                 title: fd.get('title'),
-                content: fd.get('content'),
+                file_path: fd.get('file_path'),
                 tags: fd.get('tags') || '[]',
               })
             }}>
@@ -169,15 +169,16 @@ export function Documents() {
                   <input name="title" required className="agora-input" placeholder="Document title" />
                 </div>
                 <div>
+                  <label className="block text-sm text-surface-400 mb-1">File Path *</label>
+                  <input name="file_path" required className="agora-input font-mono text-sm" placeholder="docs/dev_note/我的笔记.md" />
+                  <p className="text-xs text-surface-600 mt-1">Absolute or relative path to the .md file on disk. Agora only indexes metadata — the file must already exist.</p>
+                </div>
+                <div>
                   <label className="block text-sm text-surface-400 mb-1">Tags (JSON array)</label>
                   <input name="tags" className="agora-input font-mono text-xs" placeholder='["bugfix", "v1.0"]' />
                 </div>
-                <div>
-                  <label className="block text-sm text-surface-400 mb-1">Content (Markdown) *</label>
-                  <textarea name="content" required className="agora-input font-mono text-sm" rows={12} placeholder="# My Document&#10;&#10;Start writing..." />
-                </div>
                 <button type="submit" disabled={createMut.isPending} className="agora-btn-primary w-full justify-center">
-                  {createMut.isPending ? <Loader2 size={16} className="animate-spin" /> : 'Create'}
+                  {createMut.isPending ? <Loader2 size={16} className="animate-spin" /> : 'Add Index'}
                 </button>
               </div>
             </form>

@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -43,10 +45,13 @@ func (h *Handler) ListDocuments(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetDocument(w http.ResponseWriter, r *http.Request) {
+	projectID, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	docID, _ := strconv.ParseInt(chi.URLParam(r, "docID"), 10, 64)
 	var d model.Document
-	err := h.DB.QueryRow(`SELECT id, project_id, type, title, file_path, tags, created_at, updated_at FROM documents WHERE id = ?`, docID).
-		Scan(&d.ID, &d.ProjectID, &d.Type, &d.Title, &d.FilePath, &d.Tags, &d.CreatedAt, &d.UpdatedAt)
+	err := h.DB.QueryRow(
+		`SELECT id, project_id, type, title, file_path, tags, created_at, updated_at FROM documents WHERE id = ? AND project_id = ?`,
+		docID, projectID,
+	).Scan(&d.ID, &d.ProjectID, &d.Type, &d.Title, &d.FilePath, &d.Tags, &d.CreatedAt, &d.UpdatedAt)
 	if err != nil {
 		respondError(w, http.StatusNotFound, "document not found")
 		return
@@ -55,11 +60,38 @@ func (h *Handler) GetDocument(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ReadDocumentContent(w http.ResponseWriter, r *http.Request) {
+	projectID, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	docID, _ := strconv.ParseInt(chi.URLParam(r, "docID"), 10, 64)
-	var filePath string
-	err := h.DB.QueryRow(`SELECT file_path FROM documents WHERE id = ?`, docID).Scan(&filePath)
+
+	var filePath, rootPath string
+	err := h.DB.QueryRow(
+		`SELECT d.file_path, COALESCE(p.root_path, '') FROM documents d
+		JOIN projects p ON p.id = d.project_id
+		WHERE d.id = ? AND d.project_id = ?`,
+		docID, projectID,
+	).Scan(&filePath, &rootPath)
 	if err != nil {
 		respondError(w, http.StatusNotFound, "document not found")
+		return
+	}
+
+	// Validate file_path is under project root_path to prevent path traversal
+	if rootPath == "" {
+		respondError(w, http.StatusBadRequest, "project root_path is not set")
+		return
+	}
+	absRoot, err := filepath.Abs(rootPath)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "invalid project root_path")
+		return
+	}
+	absFile, err := filepath.Abs(filePath)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "invalid document file_path")
+		return
+	}
+	if !strings.HasPrefix(absFile, absRoot+string(filepath.Separator)) && absFile != absRoot {
+		respondError(w, http.StatusForbidden, "file_path is outside project root")
 		return
 	}
 
@@ -121,6 +153,7 @@ func (h *Handler) CreateDocument(w http.ResponseWriter, r *http.Request) {
 
 // UpdateDocument updates metadata only (title, tags). Does not modify the file.
 func (h *Handler) UpdateDocument(w http.ResponseWriter, r *http.Request) {
+	projectID, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	docID, _ := strconv.ParseInt(chi.URLParam(r, "docID"), 10, 64)
 
 	var req struct {
@@ -153,12 +186,17 @@ func (h *Handler) UpdateDocument(w http.ResponseWriter, r *http.Request) {
 		query += `, tags = ?`
 		args = append(args, req.Tags)
 	}
-	query += ` WHERE id = ?`
-	args = append(args, docID)
+	query += ` WHERE id = ? AND project_id = ?`
+	args = append(args, docID, projectID)
 
-	_, err := h.DB.Exec(query, args...)
+	result, err := h.DB.Exec(query, args...)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+	rows, _ := result.RowsAffected()
+	if rows == 0 {
+		respondError(w, http.StatusNotFound, "document not found in this project")
 		return
 	}
 
@@ -166,10 +204,16 @@ func (h *Handler) UpdateDocument(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) DeleteDocument(w http.ResponseWriter, r *http.Request) {
+	projectID, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	docID, _ := strconv.ParseInt(chi.URLParam(r, "docID"), 10, 64)
-	_, err := h.DB.Exec(`DELETE FROM documents WHERE id = ?`, docID)
+	result, err := h.DB.Exec(`DELETE FROM documents WHERE id = ? AND project_id = ?`, docID, projectID)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+	rows, _ := result.RowsAffected()
+	if rows == 0 {
+		respondError(w, http.StatusNotFound, "document not found in this project")
 		return
 	}
 	respondJSON(w, http.StatusNoContent, nil)
