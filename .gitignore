@@ -9,6 +9,7 @@ backend/agora-server
 
 # Data
 agora-db/
+agora-data/
 *.db
 *.db-journal
 *.db-wal
